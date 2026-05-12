@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Convertly — OCR de facturas con extracción estructurada · ES/MX/AR</title>
+<meta name="description" content="API de extracción de datos de facturas (factura, CFDI, AFIP) con OCR + IA local. Salida JSON validada con CIF/RFC/CUIT checksums. Desde €19/mes." />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  pre { font-family: "SF Mono", Menlo, Consolas, monospace; }
+  .dropzone-active { border-color: #6366f1; background: #eef2ff; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<!-- ─── NAV ─────────────────────────────────────────────────────── -->
+<nav class="bg-white border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl font-bold text-indigo-600">Convertly</span>
+      <span class="text-xs uppercase tracking-wider text-slate-500">facturas</span>
+    </div>
+    <div class="flex gap-6 text-sm">
+      <a href="#demo" class="text-slate-700 hover:text-indigo-600">Demo</a>
+      <a href="#pricing" class="text-slate-700 hover:text-indigo-600">Precios</a>
+      <a href="#docs" class="text-slate-700 hover:text-indigo-600">Docs</a>
+      <a href="#contact" class="text-slate-700 hover:text-indigo-600">Contacto</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ────────────────────────────────────────────────────── -->
+<section class="gradient-bg text-white py-20">
+  <div class="max-w-6xl mx-auto px-6 text-center">
+    <h1 class="text-5xl font-bold leading-tight mb-6">
+      OCR de facturas con extracción estructurada
+    </h1>
+    <p class="text-xl text-indigo-100 mb-4">
+      Sube una factura escaneada (PDF o imagen) y recibe JSON validado con
+      <strong>NIF, RFC o CUIT</strong> verificados por checksum oficial.
+    </p>
+    <p class="text-base text-indigo-200 mb-8">
+      🇪🇸 España · 🇲🇽 México · 🇦🇷 Argentina — detección automática de país.
+    </p>
+    <div class="flex justify-center gap-4">
+      <a href="#demo" class="bg-white text-indigo-700 font-semibold px-8 py-3 rounded-lg hover:bg-indigo-50 transition">
+        Probar gratis
+      </a>
+      <a href="#pricing" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-white hover:text-indigo-700 transition">
+        Ver precios
+      </a>
+    </div>
+    <p class="mt-8 text-sm text-indigo-200">
+      Diferencial: <span class="font-bold">precio 5× menor que Veryfi/Mindee</span>, soporte hispano,
+      validación regional de tax IDs.
+    </p>
+  </div>
+</section>
+
+<!-- ─── DEMO LIVE ───────────────────────────────────────────────── -->
+<section id="demo" class="py-16 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-4">Probalo ya</h2>
+    <p class="text-center text-slate-600 mb-10">
+      Subí una factura real y mirá el JSON extraído en vivo. Sin registro.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Upload -->
+      <div>
+        <div class="mb-4 flex gap-2">
+          <label class="text-sm font-medium">País:</label>
+          <select id="country" class="border rounded px-3 py-1 text-sm">
+            <option value="auto">Auto-detectar</option>
+            <option value="es">🇪🇸 España</option>
+            <option value="mx">🇲🇽 México</option>
+            <option value="ar">🇦🇷 Argentina</option>
+          </select>
+        </div>
+
+        <div id="dropzone" class="border-2 border-dashed border-slate-300 rounded-lg p-12 text-center cursor-pointer hover:border-indigo-500 transition">
+          <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <p class="mt-4 text-sm text-slate-600">
+            <strong>Arrastrá una factura</strong> o hacé click para seleccionar
+          </p>
+          <p class="text-xs text-slate-500 mt-1">PNG, JPG, PDF · máx 20 MB</p>
+          <input id="fileInput" type="file" accept="image/*,application/pdf" class="hidden">
+        </div>
+
+        <p id="status" class="mt-4 text-sm text-slate-600 text-center"></p>
+
+        <div class="mt-6 text-xs text-slate-500">
+          <strong>Sample para probar:</strong>
+          <button data-sample="es" class="sample-btn underline text-indigo-600">🇪🇸 factura ES</button> ·
+          <button data-sample="mx" class="sample-btn underline text-indigo-600">🇲🇽 factura MX</button> ·
+          <button data-sample="ar" class="sample-btn underline text-indigo-600">🇦🇷 factura AR</button>
+        </div>
+      </div>
+
+      <!-- JSON output -->
+      <div>
+        <div class="bg-slate-900 rounded-lg p-4 h-full min-h-[400px] relative">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs text-slate-400">JSON estructurado</span>
+            <button id="copyBtn" class="text-xs text-slate-400 hover:text-white hidden">📋 Copiar</button>
+          </div>
+          <pre id="output" class="text-green-400 text-xs overflow-auto h-[450px]">// Subí una factura para ver el JSON acá...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ────────────────────────────────────────────────── -->
+<section class="py-16 bg-slate-50">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">¿Por qué Convertly?</h2>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div>
+        <div class="text-4xl mb-3">🌎</div>
+        <h3 class="text-lg font-semibold mb-2">3 países, 1 API</h3>
+        <p class="text-slate-600 text-sm">
+          Detecta automáticamente si es factura española, CFDI mexicano o
+          comprobante AFIP. NIF/CIF/NIE, RFC física/moral, CUIT/CUIL — todos
+          validados por checksum oficial.
+        </p>
+      </div>
+      <div>
+        <div class="text-4xl mb-3">💸</div>
+        <h3 class="text-lg font-semibold mb-2">Hasta 5× más barato</h3>
+        <p class="text-slate-600 text-sm">
+          Veryfi/Mindee cobran $80–300/mes y solo en inglés. Convertly empieza
+          en €19/mes con 500 facturas/mes y soporte en castellano.
+        </p>
+      </div>
+      <div>
+        <div class="text-4xl mb-3">🔒</div>
+        <h3 class="text-lg font-semibold mb-2">Privacidad</h3>
+        <p class="text-slate-600 text-sm">
+          OCR + LLM corren en infraestructura propia. Tus facturas no se
+          guardan ni se mandan a OpenAI/Google. Auto-delete tras procesar.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─────────────────────────────────────────────────── -->
+<section id="pricing" class="py-16 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">Precios simples</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="border rounded-lg p-8">
+        <h3 class="text-xl font-bold mb-2">Free</h3>
+        <p class="text-3xl font-bold mb-1">€0<span class="text-base font-normal text-slate-500">/mes</span></p>
+        <p class="text-sm text-slate-600 mb-6">Probar la API</p>
+        <ul class="space-y-2 text-sm mb-6">
+          <li>✓ <strong>100 facturas/mes</strong></li>
+          <li>✓ Los 3 países</li>
+          <li>✓ JSON estructurado</li>
+          <li>✓ Tax-ID checksums</li>
+          <li>✗ Sin soporte</li>
+        </ul>
+        <button class="w-full border-2 border-indigo-600 text-indigo-600 font-semibold py-2 rounded">
+          Empezar gratis
+        </button>
+      </div>
+      <div class="border-2 border-indigo-600 rounded-lg p-8 relative shadow-lg">
+        <div class="absolute top-0 right-4 -translate-y-1/2 bg-indigo-600 text-white text-xs px-3 py-1 rounded-full">
+          Más popular
+        </div>
+        <h3 class="text-xl font-bold mb-2">Starter</h3>
+        <p class="text-3xl font-bold mb-1">€19<span class="text-base font-normal text-slate-500">/mes</span></p>
+        <p class="text-sm text-slate-600 mb-6">Pymes / autónomos</p>
+        <ul class="space-y-2 text-sm mb-6">
+          <li>✓ <strong>500 facturas/mes</strong></li>
+          <li>✓ Batch processing</li>
+          <li>✓ Excel export</li>
+          <li>✓ Tax-ID checksums</li>
+          <li>✓ Soporte por email</li>
+        </ul>
+        <button class="w-full bg-indigo-600 text-white font-semibold py-2 rounded">
+          Empezar trial
+        </button>
+      </div>
+      <div class="border rounded-lg p-8">
+        <h3 class="text-xl font-bold mb-2">Pro</h3>
+        <p class="text-3xl font-bold mb-1">€49<span class="text-base font-normal text-slate-500">/mes</span></p>
+        <p class="text-sm text-slate-600 mb-6">Asesorías / contadurías</p>
+        <ul class="space-y-2 text-sm mb-6">
+          <li>✓ <strong>5,000 facturas/mes</strong></li>
+          <li>✓ Webhooks</li>
+          <li>✓ Soporte prioritario</li>
+          <li>✓ SLA 99%</li>
+          <li>✓ Volumen → descuento</li>
+        </ul>
+        <button class="w-full border-2 border-indigo-600 text-indigo-600 font-semibold py-2 rounded">
+          Empezar trial
+        </button>
+      </div>
+    </div>
+    <p class="text-center text-sm text-slate-500 mt-8">
+      ¿Necesitás más volumen o on-premise? <a href="#contact" class="text-indigo-600 underline">Hablemos</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ─── DOCS ────────────────────────────────────────────────────── -->
+<section id="docs" class="py-16 bg-slate-50">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-4">API quick-start</h2>
+    <p class="text-center text-slate-600 mb-10">3 minutos al primer JSON</p>
+
+    <div class="bg-slate-900 rounded-lg p-6 max-w-3xl mx-auto">
+      <pre class="text-green-400 text-sm overflow-x-auto"><code># 1. Obtené tu API key (signup → email con la key)
+
+# 2. POST con la factura
+curl -X POST https://convertly.io/v1/invoice/extract \
+  -H "Authorization: Bearer ck_live_xxxxxxxxxx" \
+  -F "file=@factura.pdf" \
+  -F "country=auto"
+
+# 3. Recibís JSON estructurado:
+{
+  "success": true,
+  "invoice": {
+    "country": "es",
+    "document_type": "invoice",
+    "invoice_number": "2025/0001",
+    "issuer": {
+      "name": "Telefónica de España SAU",
+      "tax_id": {
+        "value": "A58818501",
+        "type": "CIF",
+        "valid_checksum": true
+      }
+    },
+    "subtotal": 2600.00,
+    "tax_breakdown": [{"rate": 0.21, "base": 2600, "amount": 546}],
+    "total": 3146.00,
+    "currency": "EUR"
+  }
+}</code></pre>
+    </div>
+
+    <p class="text-center text-sm text-slate-500 mt-8">
+      Endpoints disponibles: <code>/v1/invoice/extract</code>, <code>/v1/invoice/batch</code>,
+      <code>/v1/invoice/to-excel</code>
+    </p>
+  </div>
+</section>
+
+<!-- ─── CONTACT ─────────────────────────────────────────────────── -->
+<section id="contact" class="py-16 bg-white">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold mb-4">¿Querés probarlo en tu flujo?</h2>
+    <p class="text-slate-600 mb-8">
+      Mandanos un email con tu volumen aproximado y caso de uso. Te respondemos
+      en 24 horas con setup customizado y trial extendido.
+    </p>
+    <a href="mailto:hola@convertly.io" class="inline-block bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-indigo-700 transition">
+      hola@convertly.io
+    </a>
+  </div>
+</section>
+
+<!-- ─── FOOTER ──────────────────────────────────────────────────── -->
+<footer class="bg-slate-900 text-slate-400 py-8">
+  <div class="max-w-6xl mx-auto px-6 text-sm flex justify-between flex-wrap gap-4">
+    <div>
+      <span class="text-white font-bold">Convertly</span> — facturas estructuradas multi-país
+    </div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-white">Términos</a>
+      <a href="#" class="hover:text-white">Privacidad</a>
+      <a href="#" class="hover:text-white">API status</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── JS: demo upload ─────────────────────────────────────────── -->
+<script>
+// Demo público: API key con quota limitada (regenerable si se abusa).
+// Cuando registremos convertly.io: tunnel persistente + /api/demo endpoint que mintea keys on-the-fly.
+const DEMO_API_KEY = "ck_live_O9XBC5gM56FbBy_uN9qbUpcUydGI0NUsREgcyCm3ZQA";
+const API_URL = "https://strengthen-railroad-translate-structural.trycloudflare.com";
+
+const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
+const output = document.getElementById("output");
+const statusEl = document.getElementById("status");
+const countrySel = document.getElementById("country");
+const copyBtn = document.getElementById("copyBtn");
+
+["dragenter","dragover"].forEach(e => dropzone.addEventListener(e, ev => {
+  ev.preventDefault(); ev.stopPropagation();
+  dropzone.classList.add("dropzone-active");
+}));
+["dragleave","drop"].forEach(e => dropzone.addEventListener(e, ev => {
+  ev.preventDefault(); ev.stopPropagation();
+  dropzone.classList.remove("dropzone-active");
+}));
+dropzone.addEventListener("drop", e => handleFile(e.dataTransfer.files[0]));
+dropzone.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", e => handleFile(e.target.files[0]));
+
+document.querySelectorAll(".sample-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const country = btn.dataset.sample;
+    statusEl.textContent = `Cargando sample ${country.toUpperCase()}...`;
+    const r = await fetch(`/static/factura-${country}.png`);
+    const blob = await r.blob();
+    const file = new File([blob], `factura-${country}.png`, { type: "image/png" });
+    countrySel.value = country;
+    handleFile(file);
+  });
+});
+
+async function handleFile(file) {
+  if (!file) return;
+  statusEl.textContent = `Procesando ${file.name} (${(file.size/1024).toFixed(1)} KB)...`;
+  output.textContent = "// Esperando respuesta del modelo (~7-10s)...";
+
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("country", countrySel.value);
+
+  const t0 = performance.now();
+  try {
+    const r = await fetch(`${API_URL}/v1/invoice/extract`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${DEMO_API_KEY}` },
+      body: fd,
+    });
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+    if (!r.ok) {
+      const err = await r.text();
+      output.textContent = `// HTTP ${r.status}\n${err}`;
+      statusEl.textContent = `Error tras ${elapsed}s`;
+      return;
+    }
+    const data = await r.json();
+    output.textContent = JSON.stringify(data, null, 2);
+    copyBtn.classList.remove("hidden");
+    statusEl.textContent = `✓ Procesado en ${elapsed}s — país detectado: ${data.invoice?.country?.toUpperCase()}`;
+  } catch (e) {
+    output.textContent = `// Error: ${e.message}`;
+    statusEl.textContent = "Error de red";
+  }
+}
+
+copyBtn.addEventListener("click", () => {
+  navigator.clipboard.writeText(output.textContent);
+  copyBtn.textContent = "✓ Copiado";
+  setTimeout(() => copyBtn.textContent = "📋 Copiar", 1500);
+});
+</script>
+
+</body>
+</html>
