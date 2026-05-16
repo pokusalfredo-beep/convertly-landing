@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy · Convertly</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<nav class="bg-white border-b border-slate-200">
+  <div class="max-w-3xl mx-auto px-6 py-4">
+    <a href="index.html" class="text-2xl font-bold text-indigo-600">Convertly</a>
+  </div>
+</nav>
+
+<main class="max-w-3xl mx-auto px-6 py-12 prose prose-slate">
+  <h1 class="text-3xl font-bold mb-2">Privacy Policy</h1>
+  <p class="text-sm text-slate-500 mb-8">Last updated: 12 May 2026</p>
+
+  <p>This Privacy Policy explains what information Convertly ("we", "the Software") collects,
+  why, and how we handle it. Convertly is operated by Alfredo, based in Guatemala. Payments are
+  processed by Lemon Squeezy, Inc. as Merchant of Record.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">1. Data You Process Yourself</h2>
+  <p><strong>Convertly is self-hosted.</strong> Invoices, documents, and any data you process
+  through the Software <strong>stay on your infrastructure</strong>. We do not collect, store,
+  or have any access to your invoice data, extracted JSON, customer files, or processing logs.</p>
+
+  <p>OCR (docTR) and the language model (Ollama / Llama) run inside Docker containers on your
+  hardware. No data is transmitted to OpenAI, Anthropic, Google, or any third-party AI service.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">2. Data the Demo Page Collects</h2>
+  <p>Our public landing page at <code>pokusalfredo-beep.github.io/convertly-landing/</code>
+  hosts a "live demo" widget. Files you upload to the demo:</p>
+  <ul class="list-disc pl-6 space-y-1">
+    <li>Are sent to our public demo backend over HTTPS</li>
+    <li>Are processed and the resulting JSON returned</li>
+    <li>Are NOT stored persistently — discarded immediately after the response is generated</li>
+    <li>Do generate access logs (IP, timestamp, request size) for rate-limiting and abuse
+    prevention. These logs are retained for 30 days.</li>
+  </ul>
+  <p>If you want to evaluate Convertly with sensitive data, download the Software (trial mode is
+  free) and process it locally.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">3. Data Lemon Squeezy Collects (Purchases)</h2>
+  <p>When you purchase a license, Lemon Squeezy processes payment, billing, and tax compliance.
+  They collect:</p>
+  <ul class="list-disc pl-6 space-y-1">
+    <li>Email address</li>
+    <li>Billing name and address</li>
+    <li>Payment method (card details — handled by Stripe under the hood)</li>
+    <li>IP address and country (for tax calculation)</li>
+  </ul>
+  <p>Lemon Squeezy's privacy practices: <a href="https://www.lemonsqueezy.com/privacy" class="text-indigo-600 underline">lemonsqueezy.com/privacy</a>.</p>
+
+  <p>We receive from Lemon Squeezy: your email, license tier purchased, and a generated license
+  key. We do not see your card data.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">4. License Validation</h2>
+  <p>When the Software starts, it contacts Lemon Squeezy's licensing API to verify your license
+  key is valid. The only data sent is the license key itself. No invoice data, customer data,
+  or usage metrics are sent.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">5. Email Communication</h2>
+  <p>We may email you at the address Lemon Squeezy provides to:</p>
+  <ul class="list-disc pl-6 space-y-1">
+    <li>Deliver your license key after purchase</li>
+    <li>Send security patches or critical updates</li>
+    <li>Respond to your support requests</li>
+  </ul>
+  <p>We do not send marketing emails. We do not share your email with third parties.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">6. Cookies and Tracking</h2>
+  <p>The landing page does not use marketing cookies, analytics trackers, or fingerprinting. It
+  loads Tailwind CSS from a public CDN (cdn.tailwindcss.com) — that CDN may set its own cookies.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">7. Your Rights (GDPR / LFPDPPP / Ley 25.326)</h2>
+  <p>If you are in the EU, Mexico, or Argentina (or anywhere with applicable privacy law) you
+  have the right to:</p>
+  <ul class="list-disc pl-6 space-y-1">
+    <li>Access the data we have about you</li>
+    <li>Correct inaccurate data</li>
+    <li>Request deletion of your data</li>
+    <li>Object to processing</li>
+    <li>Data portability</li>
+  </ul>
+  <p>To exercise these rights: <a href="mailto:hola@convertly.io" class="text-indigo-600 underline">hola@convertly.io</a>.
+  We respond within 30 days.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">8. Data Retention</h2>
+  <ul class="list-disc pl-6 space-y-1">
+    <li>Purchase records (email, license tier, license key): retained while your license remains
+    active, plus 7 years for tax/accounting compliance.</li>
+    <li>Demo access logs: 30 days.</li>
+    <li>Support emails: 2 years from last contact.</li>
+  </ul>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">9. Children's Privacy</h2>
+  <p>Convertly is a B2B developer tool. We do not knowingly collect data from anyone under 16.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">10. Changes to this Policy</h2>
+  <p>We may update this policy. Significant changes will be notified by email to existing
+  licensees. The "Last updated" date at the top reflects the current version.</p>
+
+  <h2 class="text-xl font-bold mt-8 mb-3">11. Contact</h2>
+  <p>Questions about privacy: <a href="mailto:hola@convertly.io" class="text-indigo-600 underline">hola@convertly.io</a>.</p>
+
+  <p class="text-center mt-12">
+    <a href="index.html" class="text-indigo-600 underline">← Back to home</a>
+  </p>
+</main>
+
+</body>
+</html>
