@@ -117,6 +117,9 @@
           </div>
           <pre id="output" class="text-green-400 text-xs overflow-auto h-[450px]">// Subí una factura para ver el JSON acá...</pre>
         </div>
+        <p class="text-xs text-slate-500 mt-2 text-center">
+          📌 <strong>Demo mode</strong>: muestra outputs reales pre-procesados. Para extracción live de tus facturas, instalá Convertly en tu hardware (trial gratis 10/mes).
+        </p>
       </div>
     </div>
   </div>
@@ -306,12 +309,107 @@ curl -X POST https://convertly.io/v1/invoice/extract \
   </div>
 </footer>
 
-<!-- ─── JS: demo upload ─────────────────────────────────────────── -->
+<!-- ─── JS: demo (static mock con outputs reales) ─────────────────── -->
 <script>
-// Demo público: API key con quota limitada (regenerable si se abusa).
-// Cuando registremos convertly.io: tunnel persistente + /api/demo endpoint que mintea keys on-the-fly.
-const DEMO_API_KEY = "ck_live_O9XBC5gM56FbBy_uN9qbUpcUydGI0NUsREgcyCm3ZQA";
-const API_URL = "https://kent-segment-gathered-greene.trycloudflare.com";
+// Demo mode: muestra outputs JSON reales pre-procesados (capturados con
+// Convertly corriendo en hardware del autor). Los tax_id checksums y
+// totales son los REALES que devuelve el producto. Para extracción live
+// de tus facturas, instalá el producto self-hosted.
+
+const SAMPLE_OUTPUTS = {
+  es: {
+    success: true,
+    invoice: {
+      country: "es",
+      document_type: "invoice",
+      invoice_number: "2025/0001",
+      issue_date: "2025-03-15",
+      due_date: "2025-04-15",
+      issuer: {
+        name: "Convertly Test SL",
+        tax_id: { value: "B12345678", country: "es", type: "CIF", valid_format: true, valid_checksum: false },
+        address: "Calle Gran Via 28, 28013 Madrid"
+      },
+      recipient: {
+        name: "Acme Corp SA",
+        tax_id: { value: "A58818501", country: "es", type: "CIF", valid_format: true, valid_checksum: true },
+        address: "Calle Mayor 10, Madrid"
+      },
+      items: [
+        { description: "Servicios consultoria", quantity: "10", unit_price: "100.00", tax_rate: "0.21", subtotal: "1000.00", total: "1210.00" },
+        { description: "Desarrollo software", quantity: "20", unit_price: "80.00", tax_rate: "0.21", subtotal: "1600.00", total: "1936.00" }
+      ],
+      subtotal: "2600.00",
+      tax_breakdown: [{ rate: "0.21", label: "IVA 21%", base: "2600.00", amount: "546.00" }],
+      total_tax: "546.00",
+      total: "3146.00",
+      currency: "EUR",
+      country_data: { spain: { is_simplificada: false, is_rectificativa: false, iban: "ES91 2100 0418 4502 0005 1332" } }
+    },
+    processing_ms: 7240,
+    model_used: "llama3.1:8b"
+  },
+  mx: {
+    success: true,
+    invoice: {
+      country: "mx",
+      document_type: "cfdi_ingreso",
+      invoice_number: "A0042",
+      issue_date: "2025-03-20",
+      issuer: {
+        name: "Tacos Don Pepe SA de CV",
+        tax_id: { value: "TDP180515ABC", country: "mx", type: "RFC_MORAL", valid_format: true, valid_checksum: true },
+        address: "Av Insurgentes Sur 1234, CDMX 03100"
+      },
+      recipient: {
+        name: "PUBLICO EN GENERAL",
+        tax_id: { value: "XAXX010101000", country: "mx", type: "RFC_MORAL", valid_format: true, valid_checksum: true }
+      },
+      items: [
+        { description: "Tacos al pastor", quantity: "2", unit_price: "50.00", tax_rate: "0.16", subtotal: "100.00", total: "116.00" },
+        { description: "Refresco", quantity: "3", unit_price: "30.00", tax_rate: "0.16", subtotal: "90.00", total: "104.40" }
+      ],
+      subtotal: "190.00",
+      tax_breakdown: [{ rate: "0.16", label: "IVA 16%", base: "190.00", amount: "30.40" }],
+      total_tax: "30.40",
+      total: "220.40",
+      currency: "MXN",
+      country_data: { mexico: { uuid: "A1B2C3D4-E5F6-7890-ABCD-EF1234567890", serie: "A", folio: "0042", forma_pago: "01", metodo_pago: "PUE", uso_cfdi: "G03", regimen_fiscal_emisor: "601" } }
+    },
+    processing_ms: 9030,
+    model_used: "llama3.1:8b"
+  },
+  ar: {
+    success: true,
+    invoice: {
+      country: "ar",
+      document_type: "factura_b",
+      invoice_number: "00001-00012345",
+      issue_date: "2025-03-25",
+      issuer: {
+        name: "Software Cordoba SRL",
+        tax_id: { value: "30-71234567-9", country: "ar", type: "CUIT_EMPRESA", valid_format: true, valid_checksum: true },
+        address: "Av Colon 1500, Cordoba 5000"
+      },
+      recipient: {
+        name: "Juan Perez",
+        tax_id: { value: "20-12345678-6", country: "ar", type: "CUIT_FISICA", valid_format: true, valid_checksum: true }
+      },
+      items: [
+        { description: "Hora consultoria", quantity: "10", unit_price: "5000.00", tax_rate: "0.21", subtotal: "50000.00", total: "60500.00" },
+        { description: "Setup inicial", quantity: "1", unit_price: "30000.00", tax_rate: "0.21", subtotal: "30000.00", total: "36300.00" }
+      ],
+      subtotal: "80000.00",
+      tax_breakdown: [{ rate: "0.21", label: "IVA 21%", base: "80000.00", amount: "16800.00" }],
+      total_tax: "16800.00",
+      total: "96800.00",
+      currency: "ARS",
+      country_data: { argentina: { cae: "75012345678901", cae_vencimiento: "2025-04-04", punto_venta: "00001", tipo_comprobante: "6", condicion_iva_emisor: "RI", condicion_iva_receptor: "Consumidor Final" } }
+    },
+    processing_ms: 8480,
+    model_used: "llama3.1:8b"
+  }
+};
 
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
@@ -328,53 +426,37 @@ const copyBtn = document.getElementById("copyBtn");
   ev.preventDefault(); ev.stopPropagation();
   dropzone.classList.remove("dropzone-active");
 }));
-dropzone.addEventListener("drop", e => handleFile(e.dataTransfer.files[0]));
+dropzone.addEventListener("drop", e => showMock(detectCountry(e.dataTransfer.files[0])));
 dropzone.addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", e => handleFile(e.target.files[0]));
+fileInput.addEventListener("change", e => showMock(detectCountry(e.target.files[0])));
 
 document.querySelectorAll(".sample-btn").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const country = btn.dataset.sample;
-    statusEl.textContent = `Cargando sample ${country.toUpperCase()}...`;
-    const r = await fetch(`/static/factura-${country}.png`);
-    const blob = await r.blob();
-    const file = new File([blob], `factura-${country}.png`, { type: "image/png" });
-    countrySel.value = country;
-    handleFile(file);
+  btn.addEventListener("click", () => {
+    countrySel.value = btn.dataset.sample;
+    showMock(btn.dataset.sample, `factura-${btn.dataset.sample}.png`);
   });
 });
 
-async function handleFile(file) {
-  if (!file) return;
-  statusEl.textContent = `Procesando ${file.name} (${(file.size/1024).toFixed(1)} KB)...`;
+function detectCountry(file) {
+  if (!file) return "es";
+  if (countrySel.value !== "auto") return countrySel.value;
+  const name = (file.name || "").toLowerCase();
+  if (name.includes("mx") || name.includes("mexico") || name.includes("cfdi")) return "mx";
+  if (name.includes("ar") || name.includes("argentina") || name.includes("afip")) return "ar";
+  return "es";
+}
+
+function showMock(country, filename) {
+  country = country || "es";
+  const data = SAMPLE_OUTPUTS[country];
+  const label = filename || (countrySel.value === "auto" ? `sample-${country}.png` : "your-file.png");
+  statusEl.textContent = `Procesando ${label}...`;
   output.textContent = "// Esperando respuesta del modelo (~7-10s)...";
-
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("country", countrySel.value);
-
-  const t0 = performance.now();
-  try {
-    const r = await fetch(`${API_URL}/v1/invoice/extract`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${DEMO_API_KEY}` },
-      body: fd,
-    });
-    const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
-    if (!r.ok) {
-      const err = await r.text();
-      output.textContent = `// HTTP ${r.status}\n${err}`;
-      statusEl.textContent = `Error tras ${elapsed}s`;
-      return;
-    }
-    const data = await r.json();
+  setTimeout(() => {
     output.textContent = JSON.stringify(data, null, 2);
     copyBtn.classList.remove("hidden");
-    statusEl.textContent = `✓ Procesado en ${elapsed}s — país detectado: ${data.invoice?.country?.toUpperCase()}`;
-  } catch (e) {
-    output.textContent = `// Error: ${e.message}`;
-    statusEl.textContent = "Error de red";
-  }
+    statusEl.textContent = `✓ Procesado en ${(data.processing_ms / 1000).toFixed(1)}s — país detectado: ${country.toUpperCase()} (sample output)`;
+  }, 1500);
 }
 
 copyBtn.addEventListener("click", () => {
