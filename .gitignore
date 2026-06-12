@@ -4,3 +4,23 @@ node_modules/
 .idea/
 .vscode/
 *.swp
+
+# Overlord auto (secretos/chat)
+.env
+.env.*
+*.key
+*.pem
+*.token
+*.secret
+.credentials/
+secrets/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.claude/
+.claude*/
+*.session
+dist/
+build/
+.cache/
